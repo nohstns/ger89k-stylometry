@@ -1,0 +1,7 @@
+
+.DS_Store
+downloads/
+.idea/
+cleanup.py
+collect_data/data
+
