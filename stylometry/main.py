@@ -21,7 +21,7 @@ import pandas as pd
 # Initializing model
 ##########
 print('Initializing SpaCy model')
-nlp = spacy.load("de_core_news_sm")
+nlp = spacy.load("de_core_news_sm", exclude=["ner"])
 tokenizer = Tokenizer(nlp.vocab)
 
 
@@ -56,6 +56,9 @@ class StyloDocument(object):
         # Reading the document and defining the author and file name
         self.doc_path = os.path.join(path, str(bookid)+'.txt')
         self.doc = open(self.doc_path, "r", encoding='utf-8', errors='replace').read()
+        if len(self.doc) >= 1000000:
+            print('WARNING: DOCUMENT WAS CUT')
+            self.doc = self.doc[-999999:]
         self.author = author
         self.file_name = bookid
 
@@ -379,6 +382,14 @@ def main(argv):
     for index, entry in books.iterrows():
         bookid = entry[0]
         author = entry[1]
+
+        # Loop is first going to check whether the given book ID corresponds to a file in the given directory.
+        # If not available, it will give a message in the terminal (not in the results file!) and continue with the
+        # following row in the metadata
+        if not os.path.exists(os.path.join(os.path.join(data, str(bookid) + '.txt'))):
+            print(f'ID {bookid} not available or file was not correctly downloaded')
+            continue
+
         analysis[bookid] = extract_metrics(path=data,
                                            book_id=bookid,
                                            author=author,

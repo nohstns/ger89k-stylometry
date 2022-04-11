@@ -12,6 +12,15 @@ TOP_100 = BASE_URL + "browse/scores/top"
 
 DEFAULT_DATA_DIR = os.pardir
 
+def remove_linebreak(title:str):
+    """
+    Controls that the work's title does not contain any linebreaks that will mess up the metadata file.
+    :param title: str, title to be controlled
+    :return: clean_title: str without any line breaks
+    """
+    clean_title = '. '.join(title.splitlines())
+    return clean_title
+
 class Gutenberg_Scraper():
     def __init__(self,**kwargs):
         default_attr = dict(data_directory=DEFAULT_DATA_DIR, check_prev_downloads=True)
@@ -56,7 +65,7 @@ class Gutenberg_Scraper():
         top_100_book_links = {} #dictionary to hold booktitle:link_to_download_book
         
         for book in books[:limit]:
-            booktitle = book.text
+            booktitle = remove_linebreak(book.text)
             link = book.find("a")["href"]
 
             if (self.check_prev_downloads):
@@ -98,7 +107,7 @@ class Gutenberg_Scraper():
         url = BASE_URL + "ebooks/"+bookid
         r=self.session.get(url)
         soup = BeautifulSoup(r.content,features="lxml")
-        booktitle=soup.find("title").text
+        booktitle=remove_linebreak(soup.find("title").text)
         
         if (self.check_prev_downloads):
             if (not self.downloaded(booktitle)):
@@ -165,7 +174,7 @@ class Gutenberg_Scraper():
     def get_metadata(self,soup, bookid='Unknown'):
         bibrec=soup.find("div", {"id":"bibrec"})
         try:
-            title = bibrec.find("td",{"itemprop":"headline"}).text.replace("\n","")
+            title = remove_linebreak(bibrec.find("td",{"itemprop":"headline"}).text.replace("\n",""))
             author=bibrec.find("a", {"itemprop":"creator"}).text.replace("\n","")
             date_published = bibrec.find("td",{"itemprop":"datePublished"}).text.replace("\n","")
 
@@ -235,4 +244,4 @@ def main(argv):
 
 
 if __name__=="__main__":
-	main(sys.argv[1:])
+    main(sys.argv[1:])
