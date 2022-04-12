@@ -400,6 +400,10 @@ def main(argv):
     with open(os.path.join(dir_results, f'stylometry_{args.gender_author}_authors.json'), 'w') as fp:
         json.dump(analysis, fp)
 
+    # Saving a .csv version of our data just in case
+    data = pd.read_json(os.path.join(dir_results, f'stylometry_{args.gender_author}_authors.json'), orient='index')
+    data.to_csv(f'stylometry_{args.gender_author}_authors.csv')
+
     print('DONE!')
     print(analysis)
 
